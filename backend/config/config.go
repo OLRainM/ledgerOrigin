@@ -40,7 +40,9 @@ func getEnv(key, fallback string) string {
 }
 
 func InitDB(cfg DBConfig) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+	// 注意：不开启 parseTime，让 DATE/DATETIME 列按字符串扫描，
+	// 避免 dbr 在 SELECT * 时把 time 列扫进 string 字段而整批 Load 失败。
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&loc=Local",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
 
 	conn, err := dbr.Open("mysql", dsn, nil)

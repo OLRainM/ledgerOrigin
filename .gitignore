@@ -32,5 +32,8 @@ backend/vendor/
 Thumbs.db
 *.log
 
+# 临时调试输出
+diag_result.txt
+
 # ===== Gradle wrapper 缓存（保留脚本，忽略下载内容）=====
 .gradle/

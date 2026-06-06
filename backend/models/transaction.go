@@ -1,17 +1,15 @@
 package models
 
-import "time"
-
 type Transaction struct {
-	ID         int64     `db:"id" json:"id"`
-	UserID     int64     `db:"user_id" json:"user_id"`
-	Type       int       `db:"type" json:"type"` // 1=支出 2=收入
-	Amount     float64   `db:"amount" json:"amount"`
-	CategoryID int64     `db:"category_id" json:"category_id"`
-	AccountID  int64     `db:"account_id" json:"account_id"`
-	Note       string    `db:"note" json:"note"`
-	Date       string    `db:"date" json:"date"`
-	CreatedAt  time.Time `db:"created_at" json:"created_at"`
+	ID         int64   `db:"id" json:"id"`
+	UserID     int64   `db:"user_id" json:"user_id"`
+	Type       int     `db:"type" json:"type"` // 1=支出 2=收入
+	Amount     float64 `db:"amount" json:"amount"`
+	CategoryID int64   `db:"category_id" json:"category_id"`
+	AccountID  int64   `db:"account_id" json:"account_id"`
+	Note       string  `db:"note" json:"note"`
+	Date       string  `db:"date" json:"date"`
+	CreatedAt  string  `db:"created_at" json:"created_at"`
 }
 
 type TransactionReq struct {

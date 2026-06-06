@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private final Fragment mineFragment = new MineFragment();
     private Fragment active = recordFragment;
     private final FragmentManager fm = getSupportFragmentManager();
+    private FloatingActionButton fab;
 
     /** 接收 SyncService 同步完成广播 */
     private final BroadcastReceiver syncReceiver = new BroadcastReceiver() {
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab_add);
         fab.setOnClickListener(v ->
                 startActivity(new Intent(this, AddRecordActivity.class)));
+        this.fab = fab;
 
         // 注册广播接收器并启动后台同步服务
         LocalBroadcastManager.getInstance(this)
@@ -104,6 +106,14 @@ public class MainActivity extends AppCompatActivity {
         if (target != active) {
             fm.beginTransaction().hide(active).show(target).commit();
             active = target;
+        }
+        // 全局“记一笔”按钮仅在明细页显示，其它页面隐藏，避免与页面内按钮重复
+        if (fab != null) {
+            if (target == recordFragment) {
+                fab.show();
+            } else {
+                fab.hide();
+            }
         }
         return true;
     }
