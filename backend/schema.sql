@@ -1,0 +1,70 @@
+-- LedgerOrigin 记账APP 数据库初始化脚本
+-- 数据库: MySQL 8.0+
+
+CREATE DATABASE IF NOT EXISTS ledger_origin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE ledger_origin;
+
+-- 用户表
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password VARCHAR(255) NOT NULL COMMENT '加密密码',
+    nickname VARCHAR(50) NOT NULL DEFAULT '' COMMENT '昵称',
+    avatar VARCHAR(255) NOT NULL DEFAULT '' COMMENT '头像',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
+-- 分类表
+CREATE TABLE IF NOT EXISTS categories (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL COMMENT '所属用户',
+    name VARCHAR(50) NOT NULL COMMENT '分类名',
+    icon VARCHAR(50) NOT NULL DEFAULT '' COMMENT '图标标识',
+    type TINYINT NOT NULL DEFAULT 1 COMMENT '1=支出 2=收入',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_type (user_id, type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收支分类表';
+
+-- 账户表
+CREATE TABLE IF NOT EXISTS accounts (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL COMMENT '所属用户',
+    name VARCHAR(50) NOT NULL COMMENT '账户名',
+    type VARCHAR(20) NOT NULL DEFAULT 'cash' COMMENT '账户类型',
+    balance DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '余额',
+    icon VARCHAR(50) NOT NULL DEFAULT '' COMMENT '图标标识',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资金账户表';
+
+-- 交易记录表
+CREATE TABLE IF NOT EXISTS transactions (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL COMMENT '所属用户',
+    type TINYINT NOT NULL DEFAULT 1 COMMENT '1=支出 2=收入',
+    amount DECIMAL(12,2) NOT NULL COMMENT '金额',
+    category_id BIGINT NOT NULL COMMENT '分类ID',
+    account_id BIGINT NOT NULL COMMENT '账户ID',
+    note VARCHAR(255) NOT NULL DEFAULT '' COMMENT '备注',
+    date DATE NOT NULL COMMENT '记账日期',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_date (user_id, date),
+    INDEX idx_user_category (user_id, category_id),
+    INDEX idx_user_type (user_id, type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='交易流水表';
+
+-- 预算表
+CREATE TABLE IF NOT EXISTS budgets (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL COMMENT '所属用户',
+    category_id BIGINT NOT NULL COMMENT '分类ID',
+    amount DECIMAL(12,2) NOT NULL COMMENT '预算金额',
+    month VARCHAR(7) NOT NULL COMMENT '预算月份 YYYY-MM',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_user_cat_month (user_id, category_id, month)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='预算表';

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.LedgerOrigin" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/warm_primary</item>
+        <item name="colorPrimaryDark">@color/warm_primary_dark</item>
+        <item name="colorAccent">@color/warm_accent</item>
+        <item name="android:windowBackground">@color/warm_bg</item>
+        <item name="android:statusBarColor">@color/warm_primary_dark</item>
+        <item name="colorControlActivated">@color/warm_primary</item>
+    </style>
+</resources>

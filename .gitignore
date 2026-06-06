@@ -1,0 +1,36 @@
+# ===== 隐私 / 本地配置（切勿提交）=====
+android/local.properties
+**/local.properties
+*.env
+.env
+*.keystore
+*.jks
+
+# ===== Android 构建产物 =====
+android/.gradle/
+android/build/
+android/app/build/
+android/captures/
+android/.idea/
+android/.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ===== Go 后端 =====
+backend/*.exe
+backend/ledger-origin
+backend/main
+backend/vendor/
+
+# ===== IDE / 系统 =====
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# ===== Gradle wrapper 缓存（保留脚本，忽略下载内容）=====
+.gradle/

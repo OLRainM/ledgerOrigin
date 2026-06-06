@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/et_name"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_input"
+        android:hint="账户名称"
+        android:paddingHorizontal="14dp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_hint" />
+
+    <EditText
+        android:id="@+id/et_balance"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_input"
+        android:hint="初始余额"
+        android:inputType="numberDecimal"
+        android:paddingHorizontal="14dp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_hint" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="账户类型"
+        android:textColor="@color/text_secondary" />
+
+    <Spinner
+        android:id="@+id/spinner_type"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_input" />
+
+</LinearLayout>

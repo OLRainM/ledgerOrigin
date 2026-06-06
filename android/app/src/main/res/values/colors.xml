@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 暖色调主题色 -->
+    <color name="warm_primary">#FF7043</color>        <!-- 主橙色 -->
+    <color name="warm_primary_dark">#E64A19</color>   <!-- 深橙 -->
+    <color name="warm_primary_light">#FFAB91</color>  <!-- 浅橙 -->
+    <color name="warm_accent">#FFB300</color>         <!-- 暖黄强调 -->
+    <color name="warm_bg">#FFF8F2</color>             <!-- 暖白背景 -->
+    <color name="warm_card">#FFFFFF</color>           <!-- 卡片白 -->
+    <color name="warm_surface">#FFF3E0</color>        <!-- 浅米色 -->
+
+    <color name="text_primary">#3E2723</color>        <!-- 深棕文字 -->
+    <color name="text_secondary">#8D6E63</color>      <!-- 棕灰文字 -->
+    <color name="text_hint">#BCAAA4</color>           <!-- 提示文字 -->
+
+    <color name="income_green">#66BB6A</color>        <!-- 收入绿 -->
+    <color name="expense_red">#EF5350</color>         <!-- 支出红 -->
+
+    <color name="white">#FFFFFF</color>
+    <color name="divider">#F0E0D6</color>
+</resources>
