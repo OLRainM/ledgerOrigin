@@ -15,17 +15,17 @@ func GetBudgets(c *gin.Context) {
 	month := c.Query("month")
 
 	budgets := make([]models.BudgetResp, 0)
-	query := config.Session.Select(
-		"b.id", "b.user_id", "b.category_id", "b.amount", "b.month",
-		"COALESCE(c.name, '') AS category_name",
-	).From("budgets b").
-		LeftJoin("categories c", "b.category_id = c.id").
-		Where("b.user_id = ?", userID)
-
+	sql := `SELECT b.id, b.user_id, b.category_id, b.amount, b.month,
+			COALESCE(c.name, '') AS category_name
+		FROM budgets b
+		LEFT JOIN categories c ON b.category_id = c.id
+		WHERE b.user_id = ?`
+	args := []interface{}{userID}
 	if month != "" {
-		query = query.Where("b.month = ?", month)
+		sql += " AND b.month = ?"
+		args = append(args, month)
 	}
-	if _, err := query.Load(&budgets); err != nil {
+	if _, err := config.Session.SelectBySql(sql, args...).Load(&budgets); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "查询失败: " + err.Error()})
 		return
 	}

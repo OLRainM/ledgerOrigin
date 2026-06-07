@@ -53,53 +53,56 @@ func GetTransactions(c *gin.Context) {
 
 	offset := (page - 1) * pageSize
 
-	query := config.Session.Select(
-		"t.id", "t.user_id", "t.type", "t.amount", "t.category_id", "t.account_id",
-		"t.note",
-		"DATE_FORMAT(t.date, '%Y-%m-%d') AS date",
-		"DATE_FORMAT(t.created_at, '%Y-%m-%d %H:%i:%s') AS created_at",
-		"COALESCE(c.name, '') AS category_name",
-		"COALESCE(c.icon, '') AS category_icon",
-		"COALESCE(a.name, '') AS account_name",
-	).From("transactions t").
-		LeftJoin("categories c", "t.category_id = c.id").
-		LeftJoin("accounts a", "t.account_id = a.id").
-		Where("t.user_id = ?", userID)
+	// 使用原生 SQL，避免 dbr 把 "categories c" 这类带别名表名整体反引号包裹导致 join 失败
+	sql := `SELECT t.id, t.user_id, t.type, t.amount, t.category_id, t.account_id, t.note,
+			DATE_FORMAT(t.date, '%Y-%m-%d') AS date,
+			DATE_FORMAT(t.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
+			COALESCE(c.name, '') AS category_name,
+			COALESCE(c.icon, '') AS category_icon,
+			COALESCE(a.name, '') AS account_name
+		FROM transactions t
+		LEFT JOIN categories c ON t.category_id = c.id
+		LEFT JOIN accounts a ON t.account_id = a.id
+		WHERE t.user_id = ?`
+	args := []interface{}{userID}
+
+	countSql := "SELECT COUNT(*) FROM transactions t WHERE t.user_id = ?"
+	countArgs := []interface{}{userID}
 
 	if dateFrom != "" {
-		query = query.Where("t.date >= ?", dateFrom)
+		sql += " AND t.date >= ?"
+		args = append(args, dateFrom)
+		countSql += " AND t.date >= ?"
+		countArgs = append(countArgs, dateFrom)
 	}
 	if dateTo != "" {
-		query = query.Where("t.date <= ?", dateTo)
+		sql += " AND t.date <= ?"
+		args = append(args, dateTo)
+		countSql += " AND t.date <= ?"
+		countArgs = append(countArgs, dateTo)
 	}
 	if txType != "" {
-		query = query.Where("t.type = ?", txType)
+		sql += " AND t.type = ?"
+		args = append(args, txType)
+		countSql += " AND t.type = ?"
+		countArgs = append(countArgs, txType)
 	}
 	if categoryID != "" {
-		query = query.Where("t.category_id = ?", categoryID)
+		sql += " AND t.category_id = ?"
+		args = append(args, categoryID)
 	}
 
+	sql += " ORDER BY t.date DESC, t.id DESC LIMIT ? OFFSET ?"
+	args = append(args, pageSize, offset)
+
 	transactions := make([]models.TransactionResp, 0)
-	if _, err := query.OrderDir("t.date", false).OrderDir("t.id", false).
-		Limit(uint64(pageSize)).Offset(uint64(offset)).Load(&transactions); err != nil {
+	if _, err := config.Session.SelectBySql(sql, args...).Load(&transactions); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "查询失败: " + err.Error()})
 		return
 	}
 
-	// 获取总数
 	var total int
-	countQuery := config.Session.Select("COUNT(*)").From("transactions t").
-		Where("t.user_id = ?", userID)
-	if dateFrom != "" {
-		countQuery = countQuery.Where("t.date >= ?", dateFrom)
-	}
-	if dateTo != "" {
-		countQuery = countQuery.Where("t.date <= ?", dateTo)
-	}
-	if txType != "" {
-		countQuery = countQuery.Where("t.type = ?", txType)
-	}
-	countQuery.LoadOne(&total)
+	config.Session.SelectBySql(countSql, countArgs...).LoadOne(&total)
 
 	c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{
 		"list":  transactions,

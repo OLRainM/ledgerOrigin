@@ -47,17 +47,15 @@ func GetStatByCategory(c *gin.Context) {
 	txType := c.DefaultQuery("type", "1")
 
 	items := make([]StatItem, 0)
-	_, err := config.Session.Select(
-		"COALESCE(c.name, '') AS category_name",
-		"COALESCE(c.icon, '') AS category_icon",
-		"SUM(t.amount) AS amount",
-		"COUNT(*) AS count",
-	).From("transactions t").
-		LeftJoin("categories c", "t.category_id = c.id").
-		Where("t.user_id = ? AND t.type = ? AND DATE_FORMAT(t.date, '%Y-%m') = ?", userID, txType, month).
-		GroupBy("t.category_id", "c.name", "c.icon").
-		OrderDir("amount", false).
-		Load(&items)
+	sql := `SELECT COALESCE(c.name, '') AS category_name,
+			COALESCE(c.icon, '') AS category_icon,
+			SUM(t.amount) AS amount, COUNT(*) AS count
+		FROM transactions t
+		LEFT JOIN categories c ON t.category_id = c.id
+		WHERE t.user_id = ? AND t.type = ? AND DATE_FORMAT(t.date, '%Y-%m') = ?
+		GROUP BY t.category_id, c.name, c.icon
+		ORDER BY amount DESC`
+	_, err := config.Session.SelectBySql(sql, userID, txType, month).Load(&items)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "统计失败: " + err.Error()})
 		return
