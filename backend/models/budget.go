@@ -17,8 +17,12 @@ type BudgetReq struct {
 }
 
 type BudgetResp struct {
-	Budget
-	CategoryName string  `json:"category_name"`
+	ID           int64   `db:"id" json:"id"`
+	UserID       int64   `db:"user_id" json:"user_id"`
+	CategoryID   int64   `db:"category_id" json:"category_id"`
+	Amount       float64 `db:"amount" json:"amount"`
+	Month        string  `db:"month" json:"month"`
+	CategoryName string  `db:"category_name" json:"category_name"`
 	Spent        float64 `json:"spent"`
 	Remaining    float64 `json:"remaining"`
 	Percentage   float64 `json:"percentage"`

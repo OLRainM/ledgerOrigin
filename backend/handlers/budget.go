@@ -14,9 +14,10 @@ func GetBudgets(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	month := c.Query("month")
 
-	var budgets []models.BudgetResp
+	budgets := make([]models.BudgetResp, 0)
 	query := config.Session.Select(
-		"b.*, c.name as category_name",
+		"b.id", "b.user_id", "b.category_id", "b.amount", "b.month",
+		"COALESCE(c.name, '') AS category_name",
 	).From("budgets b").
 		LeftJoin("categories c", "b.category_id = c.id").
 		Where("b.user_id = ?", userID)
@@ -24,7 +25,10 @@ func GetBudgets(c *gin.Context) {
 	if month != "" {
 		query = query.Where("b.month = ?", month)
 	}
-	query.Load(&budgets)
+	if _, err := query.Load(&budgets); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "查询失败: " + err.Error()})
+		return
+	}
 
 	// 计算各预算的已用金额
 	for i, b := range budgets {

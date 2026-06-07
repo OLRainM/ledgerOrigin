@@ -54,7 +54,13 @@ func GetTransactions(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	query := config.Session.Select(
-		"t.*, c.name as category_name, c.icon as category_icon, a.name as account_name",
+		"t.id", "t.user_id", "t.type", "t.amount", "t.category_id", "t.account_id",
+		"t.note",
+		"DATE_FORMAT(t.date, '%Y-%m-%d') AS date",
+		"DATE_FORMAT(t.created_at, '%Y-%m-%d %H:%i:%s') AS created_at",
+		"COALESCE(c.name, '') AS category_name",
+		"COALESCE(c.icon, '') AS category_icon",
+		"COALESCE(a.name, '') AS account_name",
 	).From("transactions t").
 		LeftJoin("categories c", "t.category_id = c.id").
 		LeftJoin("accounts a", "t.account_id = a.id").
@@ -73,9 +79,12 @@ func GetTransactions(c *gin.Context) {
 		query = query.Where("t.category_id = ?", categoryID)
 	}
 
-	var transactions []models.TransactionResp
-	query.OrderDir("t.date", false).OrderDir("t.id", false).
-		Limit(uint64(pageSize)).Offset(uint64(offset)).Load(&transactions)
+	transactions := make([]models.TransactionResp, 0)
+	if _, err := query.OrderDir("t.date", false).OrderDir("t.id", false).
+		Limit(uint64(pageSize)).Offset(uint64(offset)).Load(&transactions); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "查询失败: " + err.Error()})
+		return
+	}
 
 	// 获取总数
 	var total int

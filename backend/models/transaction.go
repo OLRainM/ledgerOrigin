@@ -22,8 +22,16 @@ type TransactionReq struct {
 }
 
 type TransactionResp struct {
-	Transaction
-	CategoryName string `json:"category_name"`
-	CategoryIcon string `json:"category_icon"`
-	AccountName  string `json:"account_name"`
+	ID           int64   `db:"id" json:"id"`
+	UserID       int64   `db:"user_id" json:"user_id"`
+	Type         int     `db:"type" json:"type"`
+	Amount       float64 `db:"amount" json:"amount"`
+	CategoryID   int64   `db:"category_id" json:"category_id"`
+	AccountID    int64   `db:"account_id" json:"account_id"`
+	Note         string  `db:"note" json:"note"`
+	Date         string  `db:"date" json:"date"`
+	CreatedAt    string  `db:"created_at" json:"created_at"`
+	CategoryName string  `db:"category_name" json:"category_name"`
+	CategoryIcon string  `db:"category_icon" json:"category_icon"`
+	AccountName  string  `db:"account_name" json:"account_name"`
 }

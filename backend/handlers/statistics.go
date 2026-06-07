@@ -46,15 +46,22 @@ func GetStatByCategory(c *gin.Context) {
 	month := c.Query("month")
 	txType := c.DefaultQuery("type", "1")
 
-	var items []StatItem
-	config.Session.Select(
-		"c.name as category_name, c.icon as category_icon, SUM(t.amount) as amount, COUNT(*) as count",
+	items := make([]StatItem, 0)
+	_, err := config.Session.Select(
+		"COALESCE(c.name, '') AS category_name",
+		"COALESCE(c.icon, '') AS category_icon",
+		"SUM(t.amount) AS amount",
+		"COUNT(*) AS count",
 	).From("transactions t").
 		LeftJoin("categories c", "t.category_id = c.id").
 		Where("t.user_id = ? AND t.type = ? AND DATE_FORMAT(t.date, '%Y-%m') = ?", userID, txType, month).
-		GroupBy("t.category_id").
+		GroupBy("t.category_id", "c.name", "c.icon").
 		OrderDir("amount", false).
 		Load(&items)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "统计失败: " + err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 200, "data": items})
 }
@@ -63,15 +70,19 @@ func GetStatDaily(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	month := c.Query("month")
 
-	var stats []DailyStat
-	config.Session.SelectBySql(`
-		SELECT date,
+	stats := make([]DailyStat, 0)
+	_, err := config.Session.SelectBySql(`
+		SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
 			SUM(CASE WHEN type = 2 THEN amount ELSE 0 END) as income,
 			SUM(CASE WHEN type = 1 THEN amount ELSE 0 END) as expense
 		FROM transactions
 		WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?
-		GROUP BY date ORDER BY date
+		GROUP BY DATE_FORMAT(date, '%Y-%m-%d') ORDER BY date
 	`, userID, month).Load(&stats)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "统计失败: " + err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 200, "data": stats})
 }
